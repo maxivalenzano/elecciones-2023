@@ -12,6 +12,8 @@ import { initializeApp } from 'firebase/app';
 import { getDatabase, ref, child, get } from 'firebase/database';
 import { groupBy } from 'lodash';
 import firebaseConfig from './firebaseConfig';
+import { tableCellClasses } from '@mui/material/TableCell';
+import { styled } from '@mui/material/styles';
 
 const getVotos = (mesas) => {
   return mesas.reduce((acc, mesa) => {
@@ -25,6 +27,15 @@ const getVotos = (mesas) => {
     return acc;
   }, {});
 };
+
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  [`&.${tableCellClasses.head}`]: {
+    backgroundColor: theme.palette.action.hover,
+  },
+  [`&.${tableCellClasses.body}`]: {
+    backgroundColor: theme.palette.action.hover,
+  },
+}));
 
 function Resultados() {
   //   const [mesas, setMesas] = useState([]);
@@ -64,6 +75,11 @@ function Resultados() {
     }
     fetchData();
   }, [database]);
+
+  const cantVotantes = votosTotal['Ruly'] + votosTotal['Blanco'];
+  const cantVotosEPEP46 = votosEPEP46['Ruly'] + votosEPES34['Blanco'];
+  const cantVotosEPES34 = votosEPEP46['Ruly'] + votosEPES34['Blanco'];
+
   return (
     <div>
       <h2>Resultados</h2>
@@ -71,10 +87,10 @@ function Resultados() {
         <Table aria-label="simple table">
           <TableHead>
             <TableRow>
-              <TableCell></TableCell>
-              <TableCell align="right">EPEP 46</TableCell>
-              <TableCell align="right">EPES 34</TableCell>
-              <TableCell align="right">Total</TableCell>
+              <StyledTableCell padding="none"></StyledTableCell>
+              <StyledTableCell align="right">EPEP 46</StyledTableCell>
+              <StyledTableCell align="right">EPES 34</StyledTableCell>
+              <StyledTableCell align="right">Total</StyledTableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -101,6 +117,12 @@ function Resultados() {
               <TableCell align="right">{votosEPEP46['Negro']}</TableCell>
               <TableCell align="right">{votosEPES34['Negro']}</TableCell>
               <TableCell align="right">{votosTotal['Negro']}</TableCell>
+            </TableRow>
+            <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+              <StyledTableCell>Votantes</StyledTableCell>
+              <StyledTableCell align="right">{cantVotosEPEP46}</StyledTableCell>
+              <StyledTableCell align="right">{cantVotosEPES34}</StyledTableCell>
+              <StyledTableCell align="right">{cantVotantes}</StyledTableCell>
             </TableRow>
           </TableBody>
         </Table>
