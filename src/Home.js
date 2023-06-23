@@ -13,6 +13,7 @@ const Home = () => {
   const [selectedCandidatos, setSelectedCandidatos] = useState([]);
   const [selectedMesa, setSelectedMesa] = useState('');
   const [loading, setLoading] = useState(false);
+  const [saved, setSaved] = useState(false);
   const app = initializeApp(firebaseConfig);
   const database = getDatabase(app);
 
@@ -40,6 +41,8 @@ const Home = () => {
   }, [fetchData]);
 
   const handleChange = (event) => {
+    setSaved(false);
+    setLoading(true);
     const findCandidatos = mesas.find((item) => item.numero.toString() === event.target.value);
 
     setSelectedMesa(event.target.value);
@@ -47,11 +50,13 @@ const Home = () => {
   };
 
   const handleVotosChange = ({ target: { value } }, candidatoId) => {
+    setSaved(false);
+    setLoading(false);
     const updatedCandidatos = selectedCandidatos.map((candidato) => {
       if (candidato.id === candidatoId) {
         let inputVotos = parseInt(value);
 
-        if (!inputVotos || inputVotos < 0) {
+        if (inputVotos < 0) {
           inputVotos = 0;
         } else if (inputVotos > MAX_VOTOS) {
           inputVotos = MAX_VOTOS;
@@ -67,7 +72,7 @@ const Home = () => {
   const handleSaveVotosChange = () => {
     setLoading(true);
     const updatedCandidatos = selectedCandidatos.reduce((acc, candidato) => {
-      acc[`${candidato.id}/votos`] = candidato.votos;
+      acc[`${candidato.id}/votos`] = candidato.votos || 0;
       return acc;
     }, {});
     const mesaId = mesas.find((item) => item.numero.toString() === selectedMesa).id;
@@ -87,6 +92,7 @@ const Home = () => {
       })
       .finally(() => {
         setLoading(false);
+        setSaved(true);
       });
   };
 
@@ -140,8 +146,14 @@ const Home = () => {
       </Box>
       <Box alignItems="center" py={2}>
         {selectedMesa && (
-          <Button disabled={loading} variant="contained" fullWidth onClick={handleSaveVotosChange}>
-            Guardar
+          <Button
+            disabled={loading || saved}
+            variant="contained"
+            fullWidth
+            onClick={handleSaveVotosChange}
+            style={{ backgroundColor: saved ? 'green' : null, color: saved ? 'white' : null }}
+          >
+            {saved ? 'Guardado' : 'Guardar'}
           </Button>
         )}
       </Box>

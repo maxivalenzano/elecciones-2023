@@ -23,7 +23,12 @@ function Layout() {
     <div>
       <AppBar position="static" color="primary">
         <Toolbar>
-          <Typography variant="h6" component={Link} to="/" sx={{ flexGrow: 1 }}>
+          <Typography
+            variant="h6"
+            component={Link}
+            to="/"
+            sx={{ flexGrow: 1, color: 'white', textDecoration: 'none' }}
+          >
             Elecciones 2023
           </Typography>
           <div>
