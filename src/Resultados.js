@@ -117,6 +117,12 @@ function Resultados() {
   const cantVotosEPEP46 = votosEPEP46['Ruly'] + votosEPEP46['Blanco'];
   const cantVotosEPES34 = votosEPES34['Ruly'] + votosEPES34['Blanco'];
 
+  const getPorcentVotos = (nombre) => {
+    const percent = (votosTotal[nombre] * 100) / cantVotantes;
+    const toFixed = percent.toFixed(1);
+    return `${toFixed}%`;
+  };
+
   return (
     <div>
       <h2>Resultados</h2>
@@ -141,36 +147,28 @@ function Resultados() {
               <TableCell align="right">{votosEPEP46['Ruly']}</TableCell>
               <TableCell align="right">{votosEPES34['Ruly']}</TableCell>
               <TableCell align="right">{votosTotal['Ruly']}</TableCell>
-              <TableCell padding="none" align="right">
-                {((votosTotal['Ruly'] * 100) / cantVotantes).toFixed(1)}%
-              </TableCell>
+              <TableCell align="right">{getPorcentVotos('Ruly')}</TableCell>
             </StyledTableRow>
             <StyledTableRow>
               <TableCell>Isidro</TableCell>
               <TableCell align="right">{votosEPEP46['Isidro']}</TableCell>
               <TableCell align="right">{votosEPES34['Isidro']}</TableCell>
               <TableCell align="right">{votosTotal['Isidro']}</TableCell>
-              <TableCell padding="none" align="right">
-                {((votosTotal['Isidro'] * 100) / cantVotantes).toFixed(1)}%
-              </TableCell>
+              <TableCell align="right">{getPorcentVotos('Isidro')}</TableCell>
             </StyledTableRow>
             <StyledTableRow>
               <TableCell>Blanco</TableCell>
               <TableCell align="right">{votosEPEP46['Blanco']}</TableCell>
               <TableCell align="right">{votosEPES34['Blanco']}</TableCell>
               <TableCell align="right">{votosTotal['Blanco']}</TableCell>
-              <TableCell padding="none" align="right">
-                {((votosTotal['Blanco'] * 100) / cantVotantes).toFixed(1)}%
-              </TableCell>
+              <TableCell align="right">{getPorcentVotos('Blanco')}</TableCell>
             </StyledTableRow>
             <StyledTableRow>
               <TableCell>Negro</TableCell>
               <TableCell align="right">{votosEPEP46['Negro']}</TableCell>
               <TableCell align="right">{votosEPES34['Negro']}</TableCell>
               <TableCell align="right">{votosTotal['Negro']}</TableCell>
-              <TableCell padding="none" align="right">
-                {((votosTotal['Negro'] * 100) / cantVotantes).toFixed(1)}%
-              </TableCell>
+              <TableCell align="right">{getPorcentVotos('Negro')}</TableCell>
             </StyledTableRow>
             <StyledTableRow>
               <TableCell></TableCell>
@@ -180,7 +178,7 @@ function Resultados() {
               <TableCell align="right"></TableCell>
             </StyledTableRow>
             <StyledTableRow>
-              <StyledTableCellVotantes>Cant. Votantes</StyledTableCellVotantes>
+              <StyledTableCellVotantes>Cantidad Votantes</StyledTableCellVotantes>
               <StyledTableCellVotantes align="right">{cantVotosEPEP46}</StyledTableCellVotantes>
               <StyledTableCellVotantes align="right">{cantVotosEPES34}</StyledTableCellVotantes>
               <StyledTableCellVotantes align="right">{cantVotantes}</StyledTableCellVotantes>
