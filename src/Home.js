@@ -49,7 +49,7 @@ const Home = () => {
     };
 
     const handleSubmit = () => {
-        if (password === '7palmas') {
+        if (password === 'luna66') {
             setIsEdit(true);
             setOpen(false);
         } else {
