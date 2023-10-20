@@ -16,6 +16,7 @@ import { initializeApp } from 'firebase/app';
 import { getDatabase, ref, child, get, update } from 'firebase/database';
 import { groupBy } from 'lodash';
 import firebaseConfig from './firebaseConfig';
+import { Constants } from './Constants';
 
 const MAX_VOTOS = 350;
 
@@ -49,7 +50,7 @@ const Home = () => {
     };
 
     const handleSubmit = () => {
-        if (password === 'luna66') {
+        if (password === 'massa2023') {
             setIsEdit(true);
             setOpen(false);
         } else {
@@ -58,23 +59,23 @@ const Home = () => {
         }
     };
 
-    const fetchData = useCallback(() => {
-        const dbRef = ref(database);
-        get(child(dbRef, 'mesas/-NY_H_gWJmIzqDE9pGG9/listado'))
-            .then((snapshot) => {
-                if (snapshot.exists()) {
-                    const response = snapshot.val();
-                    const auxGroupedData = groupBy(response, 'lugar');
-                    setGroupedByLugar(auxGroupedData);
-                    setMesas(response);
-                    console.log('Home ~ fetchData ~ GroupedData:', auxGroupedData);
-                } else {
-                    console.log('No data available');
-                }
-            })
-            .catch((error) => {
-                console.error(error);
-            });
+    const fetchData = useCallback(async () => {
+        try {
+            const dbRef = ref(database);
+            const snapshot = await get(child(dbRef, Constants.primariasKey));
+
+            if (snapshot.exists()) {
+                const response = snapshot.val();
+                const auxGroupedData = groupBy(response, 'lugar');
+                setGroupedByLugar(auxGroupedData);
+                setMesas(response);
+                console.log('Home ~ fetchData ~ GroupedData:', auxGroupedData);
+            } else {
+                console.log('No data available');
+            }
+        } catch (error) {
+            console.error(error);
+        }
     }, [database]);
 
     useEffect(() => {
@@ -121,7 +122,7 @@ const Home = () => {
 
         const dbRef = ref(database);
 
-        update(child(dbRef, `mesas/-NY_H_gWJmIzqDE9pGG9/listado/${mesaId}/candidatos`), updatedCandidatos)
+        update(child(dbRef, `${Constants.primariasKey}/${mesaId}/candidatos`), updatedCandidatos)
             .then(() => {
                 console.log('Candidatos actualizados correctamente.');
                 fetchData();
@@ -163,8 +164,8 @@ const Home = () => {
                     selectedCandidatos.map((candidato) => {
                         return (
                             <Box key={candidato.id} display='flex' alignItems='center' py={2}>
-                                <Box minWidth={80}>
-                                    <Typography>{candidato.nombre}</Typography>
+                                <Box minWidth={220}>
+                                    <Typography>{Constants.candidatos[candidato.nombre]}</Typography>
                                 </Box>
                                 <TextField
                                     variant={isEdit ? 'outlined' : 'standard'}

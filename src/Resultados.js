@@ -1,195 +1,161 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-} from '@mui/material';
+import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { initializeApp } from 'firebase/app';
 import { getDatabase, ref, child, get } from 'firebase/database';
 import { groupBy } from 'lodash';
 import firebaseConfig from './firebaseConfig';
 import { tableCellClasses } from '@mui/material/TableCell';
 import { styled } from '@mui/material/styles';
+import { Constants } from './Constants';
 
 const getVotos = (mesas) => {
-  return mesas.reduce((acc, mesa) => {
-    mesa.candidatos.forEach((candidato) => {
-      if (acc[candidato.nombre]) {
-        acc[candidato.nombre] += candidato.votos;
-      } else {
-        acc[candidato.nombre] = candidato.votos;
-      }
-    });
-    return acc;
-  }, {});
+    return mesas.reduce((acc, mesa) => {
+        mesa.candidatos.forEach((candidato) => {
+            if (acc[candidato.nombre]) {
+                acc[candidato.nombre] += candidato.votos;
+            } else {
+                acc[candidato.nombre] = candidato.votos;
+            }
+        });
+        return acc;
+    }, {});
 };
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  [`&.${tableCellClasses.head}`]: {
-    backgroundColor: theme.palette.info.light,
-    fontWeight: 600,
-    // color: theme.palette.common.white,
-  },
-  [`&.${tableCellClasses.body}`]: {},
-  [`&.${tableCellClasses.footer}`]: {
-    backgroundColor: theme.palette.info.dark,
-  },
+    [`&.${tableCellClasses.head}`]: {
+        backgroundColor: theme.palette.info.light,
+        fontWeight: 600,
+        // color: theme.palette.common.white,
+    },
+    [`&.${tableCellClasses.body}`]: {},
+    [`&.${tableCellClasses.footer}`]: {
+        backgroundColor: theme.palette.info.dark,
+    },
 }));
 
 const StyledTableCellVotantes = styled(TableCell)(({ theme }) => ({
-  [`&.${tableCellClasses.head}`]: {
-    backgroundColor: theme.palette.info.light,
-    fontWeight: 600,
-    // color: theme.palette.common.white,
-  },
-  [`&.${tableCellClasses.body}`]: {
-    // backgroundColor: theme.palette.info.light,
-  },
-  [`&.${tableCellClasses.footer}`]: {
-    backgroundColor: theme.palette.common.white,
-    fontWeight: 600,
-  },
+    [`&.${tableCellClasses.head}`]: {
+        backgroundColor: theme.palette.info.light,
+        fontWeight: 600,
+        // color: theme.palette.common.white,
+    },
+    [`&.${tableCellClasses.body}`]: {
+        // backgroundColor: theme.palette.info.light,
+    },
+    [`&.${tableCellClasses.footer}`]: {
+        backgroundColor: theme.palette.common.white,
+        fontWeight: 600,
+    },
 }));
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  '&:nth-of-type(odd)': {
-    backgroundColor: theme.palette.action.hover,
-  },
-  // hide last border
-  '&:last-child td, &:last-child th': {
-    border: 4,
-  },
+    '&:nth-of-type(odd)': {
+        backgroundColor: theme.palette.action.hover,
+    },
+    // hide last border
+    '&:last-child td, &:last-child th': {
+        border: 4,
+    },
 }));
 
-// const StyledTableCell = styled(TableCell)(({ theme }) => ({
-//   [`&.${tableCellClasses.head}`]: {
-//     backgroundColor: theme.palette.action.hover,
-//   },
-//   [`&.${tableCellClasses.body}`]: {
-//     backgroundColor: theme.palette.action.hover,
-//   },
-// }));
-
 function Resultados() {
-  //   const [mesas, setMesas] = useState([]);
-  //   const [groupedByLugar, setGroupedByLugar] = useState([]);
-  //   const [loading, setLoading] = useState(false);
-  const [votosEPEP46, setVotosEPEP46] = useState([]);
-  const [votosEPES34, setVotosEPES34] = useState([]);
-  const [votosTotal, setVotosTotal] = useState([]);
-  const app = initializeApp(firebaseConfig);
-  const database = getDatabase(app);
+    const [listaCandidatos] = useState(Object.keys(Constants.candidatos));
+    const [votosEPEP46, setVotosEPEP46] = useState([]);
+    const [votosEPES34, setVotosEPES34] = useState([]);
+    const [votosTotal, setVotosTotal] = useState([]);
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const dbRef = ref(database);
-        get(child(dbRef, 'mesas/-NY_H_gWJmIzqDE9pGG9/listado'))
-          .then((snapshot) => {
-            if (snapshot.exists()) {
-              const response = snapshot.val();
-              const auxGroupedData = groupBy(response, 'lugar');
-              console.log('🚀 ~ file: Home.js:70 ~ .then ~ snapshot.val():', snapshot.val());
-              console.log('🚀 ~ file: Home.js:16 ~ fetchData ~ auxGroupedData:', auxGroupedData);
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const dbRef = ref(database);
+                const snapshot = await get(child(dbRef, Constants.primariasKey));
 
-              setVotosEPEP46(getVotos(auxGroupedData['EPEP 46']));
-              setVotosEPES34(getVotos(auxGroupedData['EPES 34']));
-              setVotosTotal(getVotos(response));
-            } else {
-              console.log('No data available');
+                if (snapshot.exists()) {
+                    const response = snapshot.val();
+                    const auxGroupedData = groupBy(response, 'lugar');
+
+                    setVotosEPEP46(getVotos(auxGroupedData['EPEP 46']));
+                    setVotosEPES34(getVotos(auxGroupedData['EPES 34']));
+                    setVotosTotal(getVotos(response));
+                } else {
+                    console.log('No data available');
+                }
+            } catch (error) {
+                console.error(error);
             }
-          })
-          .catch((error) => {
-            console.error(error);
-          });
-      } catch (e) {
-        console.error('Home.js:14 ~ fetchData ~ e:', e);
-      }
-    }
-    fetchData();
-  }, [database]);
+        };
 
-  const cantVotantes = votosTotal['Ruly'] + votosTotal['Blanco'];
-  const cantVotosEPEP46 = votosEPEP46['Ruly'] + votosEPEP46['Blanco'];
-  const cantVotosEPES34 = votosEPES34['Ruly'] + votosEPES34['Blanco'];
+        fetchData();
+    }, [database]);
 
-  const getPorcentVotos = (nombre) => {
-    const percent = (votosTotal[nombre] * 100) / cantVotantes;
-    const toFixed = percent.toFixed(1);
-    return `${toFixed}%`;
-  };
+    const calcularSumaDeVotos = (datosDeVotos, candidates) => {
+        return candidates.reduce((sumaTotal, candidato) => sumaTotal + (parseFloat(datosDeVotos[candidato]) || 0), 0);
+    };
 
-  return (
-    <div>
-      <h2>Resultados</h2>
-      <TableContainer component={Paper}>
-        <Table aria-label="simple table">
-          <TableHead>
-            <TableRow>
-              <StyledTableCell width="20%" padding="none"></StyledTableCell>
-              <StyledTableCell padding="none" align="right">
-                EPEP 46
-              </StyledTableCell>
-              <StyledTableCell padding="none" align="right">
-                EPES 34
-              </StyledTableCell>
-              <StyledTableCell align="right">Total</StyledTableCell>
-              <StyledTableCell align="right">{'(%)'}</StyledTableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            <StyledTableRow>
-              <TableCell>Ruly</TableCell>
-              <TableCell align="right">{votosEPEP46['Ruly']}</TableCell>
-              <TableCell align="right">{votosEPES34['Ruly']}</TableCell>
-              <TableCell align="right">{votosTotal['Ruly']}</TableCell>
-              <TableCell align="right">{getPorcentVotos('Ruly')}</TableCell>
-            </StyledTableRow>
-            <StyledTableRow>
-              <TableCell>Isidro</TableCell>
-              <TableCell align="right">{votosEPEP46['Isidro']}</TableCell>
-              <TableCell align="right">{votosEPES34['Isidro']}</TableCell>
-              <TableCell align="right">{votosTotal['Isidro']}</TableCell>
-              <TableCell align="right">{getPorcentVotos('Isidro')}</TableCell>
-            </StyledTableRow>
-            <StyledTableRow>
-              <TableCell>Blanco</TableCell>
-              <TableCell align="right">{votosEPEP46['Blanco']}</TableCell>
-              <TableCell align="right">{votosEPES34['Blanco']}</TableCell>
-              <TableCell align="right">{votosTotal['Blanco']}</TableCell>
-              <TableCell align="right">{getPorcentVotos('Blanco')}</TableCell>
-            </StyledTableRow>
-            <StyledTableRow>
-              <TableCell>Negro</TableCell>
-              <TableCell align="right">{votosEPEP46['Negro']}</TableCell>
-              <TableCell align="right">{votosEPES34['Negro']}</TableCell>
-              <TableCell align="right">{votosTotal['Negro']}</TableCell>
-              <TableCell align="right">{getPorcentVotos('Negro')}</TableCell>
-            </StyledTableRow>
-            <StyledTableRow>
-              <TableCell></TableCell>
-              <TableCell align="right"></TableCell>
-              <TableCell align="right"></TableCell>
-              <TableCell align="right"></TableCell>
-              <TableCell align="right"></TableCell>
-            </StyledTableRow>
-            <StyledTableRow>
-              <StyledTableCellVotantes>Cantidad Votantes</StyledTableCellVotantes>
-              <StyledTableCellVotantes align="right">{cantVotosEPEP46}</StyledTableCellVotantes>
-              <StyledTableCellVotantes align="right">{cantVotosEPES34}</StyledTableCellVotantes>
-              <StyledTableCellVotantes align="right">{cantVotantes}</StyledTableCellVotantes>
-              <TableCell align="right"></TableCell>
-            </StyledTableRow>
-          </TableBody>
-        </Table>
+    const cantVotantes = calcularSumaDeVotos(votosTotal, listaCandidatos);
+    const cantVotosEPEP46 = calcularSumaDeVotos(votosEPEP46, listaCandidatos);
+    const cantVotosEPES34 = calcularSumaDeVotos(votosEPES34, listaCandidatos);
 
-        <Table></Table>
-      </TableContainer>
-    </div>
-  );
+    const getPorcentVotos = (nombre) => {
+        if (cantVotantes > 0) {
+            const percent = (votosTotal[nombre] * 100) / cantVotantes;
+            const toFixed = percent.toFixed(1);
+            return `${toFixed}%`;
+        } else {
+            return '0%';
+        }
+    };
+
+    return (
+        <div>
+            <h2>Resultados</h2>
+            <TableContainer component={Paper}>
+                <Table aria-label='simple table'>
+                    <TableHead>
+                        <TableRow>
+                            <StyledTableCell width='20%' padding='none' />
+                            <StyledTableCell padding='none' align='right'>
+                                EPEP 46
+                            </StyledTableCell>
+                            <StyledTableCell padding='none' align='right'>
+                                EPES 34
+                            </StyledTableCell>
+                            <StyledTableCell align='right'>Total</StyledTableCell>
+                            <StyledTableCell align='right'>{'(%)'}</StyledTableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {listaCandidatos.map((candidato) => (
+                            <StyledTableRow key={candidato}>
+                                <TableCell>{Constants.candidatos[candidato]}</TableCell>
+                                <TableCell align='right'>{votosEPEP46[candidato]}</TableCell>
+                                <TableCell align='right'>{votosEPES34[candidato]}</TableCell>
+                                <TableCell align='right'>{votosTotal[candidato]}</TableCell>
+                                <TableCell align='right'>{getPorcentVotos(candidato)}</TableCell>
+                            </StyledTableRow>
+                        ))}
+                        <StyledTableRow>
+                            <TableCell align='right' />
+                            <TableCell align='right' />
+                            <TableCell align='right' />
+                            <TableCell align='right' />
+                            <TableCell align='right' />
+                        </StyledTableRow>
+                        <StyledTableRow>
+                            <StyledTableCellVotantes>Cantidad Votantes</StyledTableCellVotantes>
+                            <StyledTableCellVotantes align='right'>{cantVotosEPEP46}</StyledTableCellVotantes>
+                            <StyledTableCellVotantes align='right'>{cantVotosEPES34}</StyledTableCellVotantes>
+                            <StyledTableCellVotantes align='right'>{cantVotantes}</StyledTableCellVotantes>
+                            <TableCell align='right' />
+                        </StyledTableRow>
+                    </TableBody>
+                </Table>
+
+                <Table></Table>
+            </TableContainer>
+        </div>
+    );
 }
 export default Resultados;
