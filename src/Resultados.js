@@ -173,7 +173,9 @@ function Resultados() {
                         {mesas.map((pollingStation) => {
                             return (
                                 <StyledTableRow key={pollingStation.id}>
-                                    <TableCell>{`${pollingStation.lugar} - ${pollingStation.nombre}`}</TableCell>
+                                    <TableCell>
+                                        {pollingStation?.lugar?.replace(/ /g, '') || ''} {pollingStation.nombre}
+                                    </TableCell>
                                     {listaCandidatos.map((key) => {
                                         const findCandidatos = pollingStation.candidatos.find(
                                             (candidatos) => candidatos.nombre === key
