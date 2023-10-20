@@ -4,8 +4,8 @@ export const Constants = {
     candidatos: {
         unionPorLaPatria: 'Unión Por La Patria',
         juntosPorElCambio: 'Juntos Por El Cambio',
-        hacemosPorNuestroPais: 'Hacemos Por Nuestro Pais',
         laLibertadAvanza: 'La Libertad Avanza',
+        hacemosPorNuestroPais: 'Hacemos Por Nuestro Pais',
         frenteDeIzquierda: 'Frente De Izquierda',
     },
 };
