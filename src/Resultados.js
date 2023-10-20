@@ -63,6 +63,7 @@ function Resultados() {
     const [votosEPEP46, setVotosEPEP46] = useState([]);
     const [votosEPES34, setVotosEPES34] = useState([]);
     const [votosTotal, setVotosTotal] = useState([]);
+    const [mesas, setMesas] = useState([]);
     const app = initializeApp(firebaseConfig);
     const database = getDatabase(app);
 
@@ -76,6 +77,7 @@ function Resultados() {
                     const response = snapshot.val();
                     const auxGroupedData = groupBy(response, 'lugar');
 
+                    setMesas(response);
                     setVotosEPEP46(getVotos(auxGroupedData['EPEP 46']));
                     setVotosEPES34(getVotos(auxGroupedData['EPES 34']));
                     setVotosTotal(getVotos(response));
@@ -152,8 +154,37 @@ function Resultados() {
                         </StyledTableRow>
                     </TableBody>
                 </Table>
+            </TableContainer>
 
-                <Table></Table>
+            <h2>Resultados por mesas </h2>
+
+            <TableContainer component={Paper}>
+                <Table aria-label='simple table'>
+                    <TableHead>
+                        <TableRow>
+                            <StyledTableCell>Mesas</StyledTableCell>
+
+                            {listaCandidatos.map((nombre) => (
+                                <StyledTableCell align='right'>{Constants.candidatos[nombre]}</StyledTableCell>
+                            ))}
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {mesas.map((pollingStation) => {
+                            return (
+                                <StyledTableRow key={pollingStation.id}>
+                                    <TableCell>{`${pollingStation.lugar} - ${pollingStation.nombre}`}</TableCell>
+                                    {listaCandidatos.map((key) => {
+                                        const findCandidatos = pollingStation.candidatos.find(
+                                            (candidatos) => candidatos.nombre === key
+                                        );
+                                        return <TableCell align='right'>{findCandidatos?.votos}</TableCell>;
+                                    })}
+                                </StyledTableRow>
+                            );
+                        })}
+                    </TableBody>
+                </Table>
             </TableContainer>
         </div>
     );
